@@ -214,7 +214,7 @@ class UI(Frame):
         self.ReadingLabels = tk.Label(self.dataManagementFrame, text="Matching TADM data with NMDX Data", bg='blue', fg='white')
         self.ReadingLabels.place(relx=0, rely=0.825, anchor='nw', relwidth=1, relheight=0.20)
         self.dataManagementFrame.update()        
-        self.merged_data = self.raw_data.rename({'Channel':'Optics Channel'}, axis=1).drop_duplicates(['Test Guid', 'Replicate Number']).set_index(['Test Guid', 'Replicate Number']).join(self.tadm_data.set_index(['Test Guid', 'Replicate Number']).loc[:, [x for x in self.tadm_data.columns if x not in self.raw_data.columns]])
+        self.merged_data = self.raw_data.rename({'Channel':'Optics Channel'}, axis=1).drop_duplicates(['Test Guid', 'Replicate Number']).set_index(['Test Guid', 'Replicate Number']).join(self.tadm_data.set_index(['Test Guid', 'Replicate Number']).loc[:, [x for x in self.tadm_data.columns if x not in self.raw_data.columns]+['Channel']])
         self.ReadingLabels.destroy()
 
         self.ComparisonTypeOptions = sorted(self.raw_data.columns)+['Channel', 'LiquidClassName']
@@ -243,9 +243,8 @@ class UI(Frame):
         self.raw_data = pd.DataFrame()
         self.merged_data = pd.DataFrame()
     def plotData(self):             
-        self.tadm_data = self.tadm_data.reset_index().set_index([self.ComparisonTypeOption.get()]) 
         end_value = int(self.longest_time)
-        data_selection = self.tadm_data.loc[self.ComparisonTypeSelection.get()] 
+        data_selection = self.merged_data.reset_index().set_index([self.ComparisonTypeOption.get()]).loc[self.ComparisonTypeSelection.get()] 
         
         for col in [str(i) for i in range(0, int(self.longest_time), 10)]:
             if pd.isnull(data_selection[col].values[1]):
@@ -315,7 +314,7 @@ window_width = 1200
 window_height = 800
 windowsize = str(window_width)+"x"+str(window_height)
 root = Tk()
-root.title("TADM Viz Tool v0.0")
+root.title("TADM Viz Tool v0.1")
 root.geometry(windowsize)
 my_gui = UI(root)
 root.mainloop()
