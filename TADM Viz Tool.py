@@ -1,6 +1,7 @@
 import nmdatalytix as nmdx
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
 import numpy as np
 import tkinter as tk
@@ -12,7 +13,6 @@ from matplotlib.lines import Line2D
 
 class UI(Frame):      
     def __init__(self, master=None):
-        
         self.ColorDict36  = {1:'#FF0000',#Red 1
                 2:'#00B050',#Green 2
                 3:'#0070C0',#Blue 3
@@ -59,7 +59,6 @@ class UI(Frame):
         self.tadm_data = pd.DataFrame()
         self.merged_data = pd.DataFrame()
 
-
         ##Draw Buttons related to dataManagement
         self.dataManagementFrame = tk.Frame(master, bg='white')
         self.dataManagementFrame.place(relx=0.01, rely=0.01, relheight=0.48, relwidth=0.48, anchor='nw')
@@ -86,62 +85,93 @@ class UI(Frame):
         self.ProcessDataButton = tk.Button(self.dataFilteringOptionsFrame, text='Visualize Data', bg='white', command=self.plotData)
         self.ProcessDataButton.place(relx=0.28, rely=0.775, anchor='nw', relwidth=0.48, relheight=0.20)
 
-        self.ComparisonTypeLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Main Comparison Type:", bg='White', anchor='nw')
-        self.ComparisonTypeLabel.place(relx=0.025, rely=0.025, anchor='nw', relwidth=0.30, relheight=0.10)
+        self.VisualizationTypeSelectionLabel = tk.Label(self.dataFilteringOptionsFrame, text="Choose Visualization Type", bg='White', anchor='nw')
+        self.VisualizationTypeSelectionLabel.place(relx=0.025, rely=0.025, anchor='nw', relwidth=0.35, relheight=0.10)
+
+        VisualizationTypeVar = tk.StringVar()
+        self.VisualizationTypeOptions = ['PCR Data', 'TADM Data']
+        
+        self.VisualizationTypeOption = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=VisualizationTypeVar)
+        self.VisualizationTypeOption['values'] = self.VisualizationTypeOptions
+        self.VisualizationTypeOption.place(relx=0.40, rely=0.025, anchor='nw', relwidth=0.55, relheight=0.10)
+
+        self.ComparisonTypeLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Main Comparison Type(s):", bg='White', anchor='nw')
+        self.ComparisonTypeLabel.place(relx=0.025, rely=0.15, anchor='nw', relwidth=0.35, relheight=0.10)
 
         ComparisonTypeVar = tk.StringVar()
         self.ComparisonTypeOptions = ['Please Input Data Prior to Proceeding']
         self.ComparisonTypeOption = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonTypeVar)
         self.ComparisonTypeOption['values'] = self.ComparisonTypeOptions
-        self.ComparisonTypeOption.place(relx=0.35, rely=0.025, anchor='nw', relwidth=0.30, relheight=0.10)
+        self.ComparisonTypeOption.place(relx=0.40, rely=0.15, anchor='nw', relwidth=0.25, relheight=0.10)
         self.ComparisonTypeOption.bind('<KeyRelease>', self.check_input_ComparisonType)
         self.ComparisonTypeOption.bind("<<ComboboxSelected>>", self.update_ComparisonTypeSelections)
+
+        ComparisonTypeVar2 = tk.StringVar()
+        self.ComparisonTypeOptions2 = ['Please Input Data Prior to Proceeding']
+        self.ComparisonTypeOption2 = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonTypeVar2)
+        self.ComparisonTypeOption2['values'] = self.ComparisonTypeOptions
+        self.ComparisonTypeOption2.place(relx=0.70, rely=0.15, anchor='nw', relwidth=0.25, relheight=0.10)
+        self.ComparisonTypeOption2.bind('<KeyRelease>', self.check_input_ComparisonType)
+        self.ComparisonTypeOption2.bind("<<ComboboxSelected>>", self.update_ComparisonTypeSelections)
+
+
+        self.ComparisonTypeSelectionLabel = tk.Label(self.dataFilteringOptionsFrame, text="Filter Data to:", bg='White', anchor='nw')
+        self.ComparisonTypeSelectionLabel.place(relx=0.025, rely=0.275, anchor='nw', relwidth=0.35, relheight=0.10)
 
         ComparisonSelectionVar = tk.StringVar()
         self.ComparisonTypeSelections = ['Please Input Data Prior to Proceeding']
         self.ComparisonTypeSelection = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonSelectionVar)
         self.ComparisonTypeSelection['values'] = self.ComparisonTypeOptions
-        self.ComparisonTypeSelection.place(relx=0.675, rely=0.025, anchor='nw', relwidth=0.30, relheight=0.10)
-        #self.ComparisonTypeSelection.bind('<KeyRelease>', self.check_input_ComparisonType)
+        
+        self.ComparisonTypeSelection.place(relx=0.40, rely=0.275, anchor='nw', relwidth=0.25, relheight=0.10)
+        self.ComparisonTypeSelection.bind('<KeyRelease>', self.check_input_ComparisonSelect)
+        
+        ComparisonSelectionVar2 = tk.StringVar()
+        self.ComparisonTypeSelections2 = ['Please Input Data Prior to Proceeding']
+        self.ComparisonTypeSelection2 = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonSelectionVar2)
+        self.ComparisonTypeSelection2['values'] = self.ComparisonTypeOptions
+        self.ComparisonTypeSelection2.place(relx=0.70, rely=0.275, anchor='nw', relwidth=0.25, relheight=0.10)
+        self.ComparisonTypeSelection2.bind('<KeyRelease>', self.check_input_ComparisonSelect)
 
         self.ComparisonColLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Column Comparison Type:", bg='White', anchor='nw')
-        self.ComparisonColLabel.place(relx=0.025, rely=0.15, anchor='nw', relwidth=0.35, relheight=0.10)
-
+        self.ComparisonColLabel.place(relx=0.025, rely=0.40, anchor='nw', relwidth=0.35, relheight=0.10)
+        
         ComparisonColVar = tk.StringVar()
         self.ComparisonColOptions = ['Please Input Data Prior to Proceeding']
         self.ComparisonColOption = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonColVar)
         self.ComparisonColOption['values'] = self.ComparisonColOptions
-        self.ComparisonColOption.place(relx=0.40, rely=0.15, anchor='nw', relwidth=0.35, relheight=0.10)
+        self.ComparisonColOption.place(relx=0.40, rely=0.40, anchor='nw', relwidth=0.55, relheight=0.10)
         self.ComparisonColOption.bind('<KeyRelease>', self.check_input_ComparisonCol)
 
         self.ComparisonRowLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Row Comparison Type:", bg='White', anchor='nw')
-        self.ComparisonRowLabel.place(relx=0.025, rely=0.275, anchor='nw', relwidth=0.35, relheight=0.10)
+        self.ComparisonRowLabel.place(relx=0.025, rely=0.525, anchor='nw', relwidth=0.35, relheight=0.10)
 
         ComparisonRowVar = tk.StringVar()
         self.ComparisonRowOptions = ['Please Input Data Prior to Proceeding']
         self.ComparisonRowOption = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonRowVar)
         self.ComparisonRowOption['values'] = self.ComparisonRowOptions
-        self.ComparisonRowOption.place(relx=0.40, rely=0.275, anchor='nw', relwidth=0.35, relheight=0.10)
+        self.ComparisonRowOption.place(relx=0.40, rely=0.525, anchor='nw', relwidth=0.55, relheight=0.10)
         self.ComparisonRowOption.bind('<KeyRelease>', self.check_input_ComparisonRow)
-
-        self.ComparisonColorLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Color Comparison Type:", bg='White', anchor='nw')
-        self.ComparisonColorLabel.place(relx=0.025, rely=0.40, anchor='nw', relwidth=0.35, relheight=0.10)
 
         ComparisonColorVar = tk.StringVar()
         self.ComparisonColorOptions = ['Please Input Data Prior to Proceeding']
         self.ComparisonColorOption = ttk.Combobox(self.dataFilteringOptionsFrame, textvariable=ComparisonColorVar)
         self.ComparisonColorOption['values'] = self.ComparisonColorOptions
-        self.ComparisonColorOption.place(relx=0.40, rely=0.40, anchor='nw', relwidth=0.35, relheight=0.10)
+        self.ComparisonColorOption.place(relx=0.40, rely=0.65, anchor='nw', relwidth=0.55, relheight=0.10)
         self.ComparisonColorOption.bind('<KeyRelease>', self.check_input_ComparisonColor)
+
+        self.ComparisonColorLabel = tk.Label(self.dataFilteringOptionsFrame, text="Select Color Comparison Type:", bg='White', anchor='nw')
+        self.ComparisonColorLabel.place(relx=0.025, rely=0.65, anchor='nw', relwidth=0.35, relheight=0.10)
 
         ##Draw Data Visualization Frame
         self.dataVisualizationFrame = tk.Frame(master, bg='white')
-        self.dataVisualizationFrame.place(relx=0.01, rely=0.50, relheight=0.48, relwidth=0.98, anchor='nw')
+        self.dataVisualizationFrame.place()
     def check_input_ComparisonType(self,event):
         value = event.widget.get()
 
         if value == '':
             self.ComparisonTypeOption['values'] = self.ComparisonTypeOptions
+            self.ComparisonTypeOption2['values'] = self.ComparisonTypeOptions
         else:
             data = []
             for item in self.ComparisonTypeOptions:
@@ -149,6 +179,7 @@ class UI(Frame):
                     data.append(item)
 
             self.ComparisonTypeOption['values'] = data
+            self.ComparisonTypeOption2['values'] = data
     def check_input_ComparisonCol(self,event):
         value = event.widget.get()
 
@@ -185,9 +216,32 @@ class UI(Frame):
                     data.append(item)
 
             self.ComparisonColorOption['values'] = data
+    def check_input_ComparisonSelect(self,event):
+        value = event.widget.get()
+        if value == '':
+            self.ComparisonTypeSelection['values'] = sorted(self.tadm_data[self.ComparisonTypeOption.get()].unique())
+            self.ComparisonTypeSelection2['values'] = sorted(self.tadm_data[self.ComparisonTypeOption.get()].unique())
+        else:
+            data = []
+            for item in self.ComparisonTypeSelections:
+                if value in item:
+                    data.append(item)
+            self.ComparisonTypeSelection['values'] = data
+            self.ComparisonTypeSelection2['values'] = data
     def update_ComparisonTypeSelections(self,event):
         value = event.widget.get()
-        self.ComparisonTypeSelection['values'] = sorted(self.tadm_data[self.ComparisonTypeOption.get()].unique())
+        if self.VisualizationTypeOption.get() == 'PCR Data':
+            self.ComparisonTypeSelection['values'] = sorted([x for x  in self.raw_data[self.ComparisonTypeOption.get()].unique() if pd.isnull(x)==False])
+            self.ComparisonTypeSelection2['values'] = sorted([x for x  in self.raw_data[self.ComparisonTypeOption2.get()].unique() if pd.isnull(x)==False])
+        elif self.VisualizationTypeOption.get() == 'TADM Data':
+            if len(self.merged_data) == 0:
+                self.ComparisonTypeSelection['values'] = ["No TADM Data found."]
+                self.ComparisonTypeSelection2['values'] = ["No TADM Data found."]
+            else:
+                self.ComparisonTypeSelection['values'] = sorted([x for x  in self.merged_data[self.ComparisonTypeOption.get()].unique() if pd.isnull(x)==False])
+                self.ComparisonTypeSelection2['values'] = sorted([x for x  in self.merged_data[self.ComparisonTypeOption2.get()].unique() if pd.isnull(x)==False])
+        else:
+            self.ComparisonTypeSelection['values'] = ["Choose Visualization Type."]
     def load_raw_data(self):
         self.ReadingLabels = tk.Label(self.dataManagementFrame, text="Parsing Raw Data", bg='blue', fg='white')
         self.ReadingLabels.place(relx=0, rely=0.825, anchor='nw', relwidth=1, relheight=0.20)
@@ -196,7 +250,18 @@ class UI(Frame):
         for file in files:
             print("Reading Raw Data from file: "+str(file))
             self.raw_data = pd.concat([self.raw_data,self.myParser.scrapeFile(file=file, filename='test')])
+            self.raw_data['Sample Prefix'] = self.raw_data['Sample ID'].str[0]
         nmdx.datalabeler.retrieveConsumableSerials(self.raw_data)
+        nmdx.datalabeler.retrieveConsumableLots(self.raw_data)
+        options = sorted([x for x in self.raw_data.columns if 'Readings ' not in x])
+        self.ComparisonTypeOptions = options
+        self.ComparisonTypeOption['values']  = self.ComparisonTypeOptions
+        self.ComparisonColOptions = options
+        self.ComparisonColOption['values']  = self.ComparisonColOptions
+        self.ComparisonRowOptions = options
+        self.ComparisonRowOption['values']  = self.ComparisonRowOptions
+        self.ComparisonColorOptions = options
+        self.ComparisonColorOption['values']  = self.ComparisonColorOptions
         self.ReadingLabels.destroy()  
     def get_tadm_data(self):
         self.ReadingLabels = tk.Label(self.dataManagementFrame, text="Parsing TADM Data", bg='blue', fg='white')
@@ -215,18 +280,18 @@ class UI(Frame):
         self.ReadingLabels.place(relx=0, rely=0.825, anchor='nw', relwidth=1, relheight=0.20)
         self.dataManagementFrame.update()        
         self.merged_data = self.raw_data.rename({'Channel':'Optics Channel'}, axis=1).drop_duplicates(['Test Guid', 'Replicate Number']).set_index(['Test Guid', 'Replicate Number']).join(self.tadm_data.set_index(['Test Guid', 'Replicate Number']).loc[:, [x for x in self.tadm_data.columns if x not in self.raw_data.columns]+['Channel']])
+        self.merged_data['LiquidClass'] = self.merged_data['LiquidClassName'] + "_" + self.merged_data['StepType']
+        self.merged_data['LiquidHandlingProcessOrder'] = self.merged_data['LiquidHandlingProcessOrder'].fillna(0).astype(str).replace({'.1':'','.2':'','.3':'','.4':''}).astype(float).astype(int)
+        print(self.merged_data['Sample Prefix'].unique())
         self.ReadingLabels.destroy()
-
-        self.ComparisonTypeOptions = sorted(self.raw_data.columns)+['Channel', 'LiquidClassName']
+        options = self.ComparisonTypeOptions + ['Channel', 'TadmError', 'LiquidClass', 'LiquidHandlingProcessOrder']
+        self.ComparisonTypeOptions = options
         self.ComparisonTypeOption['values']  = self.ComparisonTypeOptions
-
-        self.ComparisonColOptions = sorted(self.raw_data.columns)+['Channel', 'LiquidClassName']
+        self.ComparisonColOptions = options
         self.ComparisonColOption['values']  = self.ComparisonColOptions
-
-        self.ComparisonRowOptions = sorted(self.raw_data.columns)+['Channel', 'LiquidClassName']
+        self.ComparisonRowOptions = options
         self.ComparisonRowOption['values']  = self.ComparisonRowOptions
-
-        self.ComparisonColorOptions = sorted(self.raw_data.columns)+['Channel', 'LiquidClassName']
+        self.ComparisonColorOptions = options
         self.ComparisonColorOption['values']  = self.ComparisonColorOptions
     def save_data(self):
         self.ReadingLabels = tk.Label(self.dataManagementFrame, text="Exporting CSV File of Matched TADM Data", bg='blue', fg='white')
@@ -242,10 +307,18 @@ class UI(Frame):
         self.tadm_data = pd.DataFrame()
         self.raw_data = pd.DataFrame()
         self.merged_data = pd.DataFrame()
-    def plotData(self):             
+    def plotData(self):
+        if self.VisualizationTypeOption.get() == 'TADM Data':
+            self.plotTADMData()
+        elif self.VisualizationTypeOption.get() == 'PCR Data':
+            self.plotPCRData()
+        else:
+            print('Invalid selections.')
+    def plotTADMData(self):             
         end_value = int(self.longest_time)
         data_selection = self.merged_data.reset_index().set_index([self.ComparisonTypeOption.get()]).loc[self.ComparisonTypeSelection.get()] 
-        
+        if self.ComparisonTypeOption2.get() != '':
+            data_selection = data_selection.set_index([self.ComparisonTypeOption2.get()]).loc[self.ComparisonTypeSelection2.get()]
         for col in [str(i) for i in range(0, int(self.longest_time), 10)]:
             if pd.isnull(data_selection[col].values[1]):
                 end_value = col
@@ -254,11 +327,15 @@ class UI(Frame):
         
 
         y_var_col = self.ComparisonRowOption.get()
+        print(y_var_col)
         x_var_col = self.ComparisonColOption.get()
+        print(x_var_col)
         color_var_col = self.ComparisonColorOption.get()
 
         x_vars = sorted(data_selection[x_var_col].unique())
+        print(x_vars)
         y_vars = sorted(data_selection[y_var_col].unique())
+        print(y_vars)
         color_vars = sorted(data_selection[color_var_col].unique())
 
         color_options = [self.ColorDict36[x] for x in self.ColorDict36]
@@ -268,8 +345,15 @@ class UI(Frame):
         for color_var in color_vars:
             colors[color_var] = color_options[color_vars.index(color_var)]
 
-        fig, axs = plt.subplots(len(y_vars),len(x_vars)+1, figsize=(20,10),sharex='row', sharey='row')
-        plt.subplots_adjust(wspace=0.05)
+        fig_width = len(x_vars)*2.5
+        fig_height = (len(y_vars)+1)*1.5
+        print(fig_width, fig_height)
+
+        share_x_var = True
+        share_y_var = True
+
+        fig, axs = plt.subplots(len(y_vars),len(x_vars)+1, figsize=(fig_width,fig_height),sharex=share_x_var, sharey=share_y_var)
+        #plt.subplots_adjust(wspace=0.05)
         data_selection_plotable = data_selection.reset_index()
         
         for item in data_selection_plotable.index:
@@ -297,7 +381,7 @@ class UI(Frame):
         for x_var in x_vars:
             for y_var in y_vars:
                 start, end = axs[y_vars.index(y_var),x_vars.index(x_var)].get_xlim()
-                axs[y_vars.index(y_var),x_vars.index(x_var)].xaxis.set_ticks(np.arange(start, end, int(end_value)/50))
+                axs[y_vars.index(y_var),x_vars.index(x_var)].xaxis.set_ticks(np.arange(start, end, int(end-start)/4))
             axs[y_vars.index(y_var),x_vars.index(x_var)].set_xlabel('Time (ms)')
 
         ##Create Legend using Color Variable Options
@@ -305,16 +389,25 @@ class UI(Frame):
         for color in colors:
             newLabel = Line2D([0], [0], color=colors[color], lw=3,label=color)
             legend_elements.append(newLabel)
-
+        
         axs[0, len(x_vars)].legend(handles=legend_elements, fontsize=12, loc='upper left', ncol=1, title=color_var_col)
         fig.suptitle(self.ComparisonTypeSelection.get(),fontsize=18)
         plt.show()
+        return
+    def plotPCRData(self):
+        plotData = self.raw_data.set_index([self.ComparisonTypeOption.get()]).loc[self.ComparisonTypeSelection.get()]
+        if self.ComparisonTypeOption2.get() != '':
+            plotData = plotData.set_index([self.ComparisonTypeOption2.get()]).loc[self.ComparisonTypeSelection2.get()]
+        plotData.to_csv('test.csv')
+        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get())
+        plt.show()
+        return
 
 window_width = 1200
 window_height = 800
 windowsize = str(window_width)+"x"+str(window_height)
 root = Tk()
-root.title("TADM Viz Tool v0.1")
+root.title("TADM Viz Tool v0.4")
 root.geometry(windowsize)
 my_gui = UI(root)
 root.mainloop()
