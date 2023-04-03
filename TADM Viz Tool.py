@@ -399,7 +399,7 @@ class UI(Frame):
         if self.ComparisonTypeOption2.get() != '':
             plotData = plotData.set_index([self.ComparisonTypeOption2.get()]).loc[self.ComparisonTypeSelection2.get()]
         plotData.to_csv('test.csv')
-        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get())
+        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get(), share_y_axis=True)
         plt.show()
         return
 
@@ -407,7 +407,7 @@ window_width = 1200
 window_height = 800
 windowsize = str(window_width)+"x"+str(window_height)
 root = Tk()
-root.title("TADM Viz Tool v0.4")
+root.title("TADM Viz Tool v0.5")
 root.geometry(windowsize)
 my_gui = UI(root)
 root.mainloop()
