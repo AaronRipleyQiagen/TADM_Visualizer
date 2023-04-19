@@ -61,7 +61,7 @@ class UI(Frame):
 
         ##Draw Buttons related to dataManagement
         self.dataManagementFrame = tk.Frame(master, bg='white')
-        self.dataManagementFrame.place(relx=0.01, rely=0.01, relheight=0.48, relwidth=0.48, anchor='nw')
+        self.dataManagementFrame.place(relx=0.01, rely=0.01, relheight=0.70, relwidth=0.48, anchor='nw')
 
         self.GetDataButton = tk.Button(self.dataManagementFrame, text="Select Raw Data", bg='white', command=self.load_raw_data)
         self.GetDataButton.place(relx=0.04, rely=0.05, anchor='nw', relwidth=0.2, relheight=0.25)
@@ -80,11 +80,29 @@ class UI(Frame):
 
         ##Draw Options Related to Data Filtering
         self.dataFilteringOptionsFrame = tk.Frame(master, bg='white')
-        self.dataFilteringOptionsFrame.place(relx=0.51, rely=0.01, relheight=0.48, relwidth=0.48, anchor='nw')
+        self.dataFilteringOptionsFrame.place(relx=0.51, rely=0.01, relheight=0.70, relwidth=0.48, anchor='nw')
 
         self.ProcessDataButton = tk.Button(self.dataFilteringOptionsFrame, text='Visualize Data', bg='white', command=self.plotData)
-        self.ProcessDataButton.place(relx=0.28, rely=0.775, anchor='nw', relwidth=0.48, relheight=0.20)
+        self.ProcessDataButton.place(relx=0.525, rely=0.775, anchor='nw', relwidth=0.425, relheight=0.20)
+        
+        
+        self.YAxisOptionsFrame = tk.Frame(self.dataFilteringOptionsFrame, bg='white')
+        self.YAxisOptionsFrame.place(relx=0.025, rely=0.775, anchor='nw', relwidth=0.425, relheight=0.20)
+        
+        YAXIS_OPTIONS = [('Share Across Row', 'row'),
+                         ('Share Across Column', 'col'),
+                         ('Share Throughout Figure', 'all')]
+        
+        self.YAxis_Selection_Label = tk.Label(self.YAxisOptionsFrame, text='Choose Y-Axis Scale Option (PCR Data Only):', bg='white').pack(anchor=tk.W)
+        
 
+        self.YAXIS_OPTIONS_BUTTONS = {}
+        self.yaxis_selection = tk.StringVar()
+        self.yaxis_selection.set('row')
+        for label, value in YAXIS_OPTIONS: 
+            self.YAXIS_OPTIONS_BUTTONS[label] = tk.Radiobutton(self.YAxisOptionsFrame, text=label, value=value, variable=self.yaxis_selection, bg='white').pack(anchor=tk.W)
+        
+        
         self.VisualizationTypeSelectionLabel = tk.Label(self.dataFilteringOptionsFrame, text="Choose Visualization Type", bg='White', anchor='nw')
         self.VisualizationTypeSelectionLabel.place(relx=0.025, rely=0.025, anchor='nw', relwidth=0.35, relheight=0.10)
 
@@ -396,10 +414,13 @@ class UI(Frame):
         return
     def plotPCRData(self):
         plotData = self.raw_data.set_index([self.ComparisonTypeOption.get()]).loc[self.ComparisonTypeSelection.get()]
+        
         if self.ComparisonTypeOption2.get() != '':
             plotData = plotData.set_index([self.ComparisonTypeOption2.get()]).loc[self.ComparisonTypeSelection2.get()]
-        plotData.to_csv('test.csv')
-        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get(), share_y_axis=True)
+        
+        share_y_option = self.yaxis_selection.get()
+        plotData = plotData[plotData['Overall Result']!='NoResult']
+        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get(), share_y_axis=share_y_option)
         plt.show()
         return
 
@@ -407,7 +428,7 @@ window_width = 1200
 window_height = 800
 windowsize = str(window_width)+"x"+str(window_height)
 root = Tk()
-root.title("TADM Viz Tool v0.5")
+root.title("TADM Viz Tool v0.6")
 root.geometry(windowsize)
 my_gui = UI(root)
 root.mainloop()
