@@ -10,7 +10,6 @@ from tkinter import ttk
 from tkinter.filedialog import askopenfilenames, asksaveasfilename
 from matplotlib.lines import Line2D
 
-
 class UI(Frame):      
     def __init__(self, master=None):
         self.ColorDict36  = {1:'#FF0000',#Red 1
@@ -61,7 +60,7 @@ class UI(Frame):
 
         ##Draw Buttons related to dataManagement
         self.dataManagementFrame = tk.Frame(master, bg='white')
-        self.dataManagementFrame.place(relx=0.01, rely=0.01, relheight=0.70, relwidth=0.48, anchor='nw')
+        self.dataManagementFrame.place(relx=0.01, rely=0.01, relheight=0.98, relwidth=0.48, anchor='nw')
 
         self.GetDataButton = tk.Button(self.dataManagementFrame, text="Select Raw Data", bg='white', command=self.load_raw_data)
         self.GetDataButton.place(relx=0.04, rely=0.05, anchor='nw', relwidth=0.2, relheight=0.25)
@@ -80,29 +79,52 @@ class UI(Frame):
 
         ##Draw Options Related to Data Filtering
         self.dataFilteringOptionsFrame = tk.Frame(master, bg='white')
-        self.dataFilteringOptionsFrame.place(relx=0.51, rely=0.01, relheight=0.70, relwidth=0.48, anchor='nw')
+        self.dataFilteringOptionsFrame.place(relx=0.51, rely=0.01, relheight=0.98, relwidth=0.48, anchor='nw')
 
         self.ProcessDataButton = tk.Button(self.dataFilteringOptionsFrame, text='Visualize Data', bg='white', command=self.plotData)
         self.ProcessDataButton.place(relx=0.525, rely=0.775, anchor='nw', relwidth=0.425, relheight=0.20)
         
         
-        self.YAxisOptionsFrame = tk.Frame(self.dataFilteringOptionsFrame, bg='white')
-        self.YAxisOptionsFrame.place(relx=0.025, rely=0.775, anchor='nw', relwidth=0.425, relheight=0.20)
+        self.AxisOptionsFrame = tk.Frame(self.dataFilteringOptionsFrame, bg='white')
+        self.AxisOptionsFrame.place(relx=0.025, rely=0.775, anchor='nw', relwidth=0.425, relheight=0.20)
         
         YAXIS_OPTIONS = [('Share Across Row', 'row'),
                          ('Share Across Column', 'col'),
                          ('Share Throughout Figure', 'all')]
         
-        self.YAxis_Selection_Label = tk.Label(self.YAxisOptionsFrame, text='Choose Y-Axis Scale Option (PCR Data Only):', bg='white').pack(anchor=tk.W)
+        self.YAxis_Selection_Label = tk.Label(self.AxisOptionsFrame, text='Choose Y-Axis Scale Option (PCR Data Only):', bg='white').pack(anchor=tk.W)
         
 
         self.YAXIS_OPTIONS_BUTTONS = {}
         self.yaxis_selection = tk.StringVar()
         self.yaxis_selection.set('row')
         for label, value in YAXIS_OPTIONS: 
-            self.YAXIS_OPTIONS_BUTTONS[label] = tk.Radiobutton(self.YAxisOptionsFrame, text=label, value=value, variable=self.yaxis_selection, bg='white').pack(anchor=tk.W)
+            self.YAXIS_OPTIONS_BUTTONS[label] = tk.Radiobutton(self.AxisOptionsFrame, text=label, value=value, variable=self.yaxis_selection, bg='white').pack(anchor=tk.W)
         
+    
+        self.XAXIS_SELECTION_FRAME = tk.Frame(self.AxisOptionsFrame, bg='white')
+        self.XAXIS_SELECTION_FRAME.pack(anchor=tk.W)
         
+        def check_numeric(P):
+            if str.isdigit(P) or P == "":
+                return True
+            else:
+                return False
+            
+        vcmd = (self.register(check_numeric))
+
+        
+
+        self.XAxis_Range_Label = tk.Label(self.XAXIS_SELECTION_FRAME, text="Choose X-Axis Scale Range:", bg='white').grid(row=0, column=0)
+
+        self.XAxis_Range_Start = tk.IntVar()
+        self.XAxis_Range_Start.set(1)
+        self.XAxis_Range_Start_Input = tk.Entry(self.XAXIS_SELECTION_FRAME, textvariable=self.XAxis_Range_Start, validate='all', validatecommand=(vcmd, '%P')).grid(row=1, column=0)
+        
+        self.XAxis_Range_End = tk.IntVar()
+        self.XAxis_Range_End.set(50)
+        self.XAxis_Range_End_Input = tk.Entry(self.XAXIS_SELECTION_FRAME, textvariable=self.XAxis_Range_End, validate='all', validatecommand=(vcmd, '%P')).grid(row=1, column=1)
+
         self.VisualizationTypeSelectionLabel = tk.Label(self.dataFilteringOptionsFrame, text="Choose Visualization Type", bg='White', anchor='nw')
         self.VisualizationTypeSelectionLabel.place(relx=0.025, rely=0.025, anchor='nw', relwidth=0.35, relheight=0.10)
 
@@ -420,7 +442,7 @@ class UI(Frame):
         
         share_y_option = self.yaxis_selection.get()
         plotData = plotData[plotData['Overall Result']!='NoResult']
-        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get(), share_y_axis=share_y_option)
+        nmdx.amplificationPlot(data=plotData, colField=self.ComparisonColOption.get(), rowField=self.ComparisonRowOption.get(), colorField=self.ComparisonColorOption.get(), share_y_axis=share_y_option, start_cycle=self.XAxis_Range_Start.get(), end_cycle=self.XAxis_Range_End.get())
         plt.show()
         return
 
@@ -428,7 +450,7 @@ window_width = 1200
 window_height = 800
 windowsize = str(window_width)+"x"+str(window_height)
 root = Tk()
-root.title("TADM Viz Tool v0.6")
+root.title("TADM Viz Tool v0.7")
 root.geometry(windowsize)
 my_gui = UI(root)
 root.mainloop()
