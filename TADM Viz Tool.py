@@ -208,7 +208,6 @@ class UI(Frame):
         self.dataVisualizationFrame.place()
     def check_input_ComparisonType(self,event):
         value = event.widget.get()
-
         if value == '':
             self.ComparisonTypeOption['values'] = self.ComparisonTypeOptions
             self.ComparisonTypeOption2['values'] = self.ComparisonTypeOptions
@@ -222,7 +221,6 @@ class UI(Frame):
             self.ComparisonTypeOption2['values'] = data
     def check_input_ComparisonCol(self,event):
         value = event.widget.get()
-
         if value == '':
             self.ComparisonColOption['values'] = self.ComparisonColOptions
         else:
